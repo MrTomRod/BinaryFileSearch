@@ -1,4 +1,4 @@
-# BinarySearchFile - Query sorted files in a RAM-efficient way!
+# BinaryFileSearch - Query sorted files in a RAM-efficient way!
 
 Binary search algorithm for big sorted files that cannot be read into RAM.
 

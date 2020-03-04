@@ -9,7 +9,7 @@ setup(
     author='Thomas Roder',
     author_email='roder.thomas@gmail.com',
     url='https://github.com/MrTomRod/',
-    download_url='https://github.com/MrTomRod/BinarySearchFile/archive/v0_1.tar.gz',
+    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_1.tar.gz',
     keywords=['binary', 'search', 'file', 'files'],
     install_requires=[],
     classifiers=[
