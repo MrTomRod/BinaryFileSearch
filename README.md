@@ -10,7 +10,7 @@ Binary search algorithm for big sorted files that cannot be read into RAM.
 
 ## Installation:
 
-```bash
+```
 pip install binary_file_search
 ```
 
@@ -35,14 +35,7 @@ Tip: `run bfs.close_file()` after usage.
 
 ### Results
 
-The function returns a of lines, the lines being separated by paramter `sep`, for example:
-```Python
-[
-    ['query', 'l1_col2', 'l1_col3', ...],  # first line that starts with 'query'
-    ['query', 'l2_col2', 'l2_col3', ...],  # second line that starts with 'query'
-    ...
-]
-```
+The function returns a list of lines, the lines being separated by paramter `sep`.
 
 If the query cannot be found, a `KeyError` is raised.
 

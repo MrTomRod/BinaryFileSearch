@@ -1,15 +1,24 @@
 from distutils.core import setup
+from os import path
+
+# Instructions:
+# https://medium.com/@joel.barmettler/how-to-upload-your-python-package-to-pypi-65edc5fe9c56
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name='binary_file_search',
     packages=['binary_file_search'],
-    version='0.2',
+    version='0.1',
     license='MIT',
     description='Binary search algorithm for big sorted files that cannot be read into RAM.',
+    long_description_content_type='text/markdown',
+    long_description=long_description,
     author='Thomas Roder',
     author_email='roder.thomas@gmail.com',
-    url='https://github.com/MrTomRod/',
-    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_2.tar.gz',
+    url='https://github.com/MrTomRod/BinaryFileSearch',
+    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_1.tar.gz',
     keywords=['binary', 'search', 'file', 'files'],
     install_requires=[],
     classifiers=[
