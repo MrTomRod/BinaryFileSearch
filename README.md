@@ -35,7 +35,15 @@ Tip: `run bfs.close_file()` after usage.
 
 ### Results
 
-The function returns a list of lines, the lines being separated by paramter `sep`.
+The function returns a list of lines, the lines being separated by paramter `sep`. Example:
+
+```Python
+[
+    ['query', 'l1_col2', 'l1_col3', ...],  # first line that starts with 'query'
+    ['query', 'l2_col2', 'l2_col3', ...],  # second line that starts with 'query'
+    ...
+]
+```
 
 If the query cannot be found, a `KeyError` is raised.
 
