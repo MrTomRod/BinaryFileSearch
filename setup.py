@@ -3,13 +3,13 @@ from distutils.core import setup
 setup(
     name='binary_file_search',
     packages=['binary_file_search'],
-    version='0.1',
+    version='0.2',
     license='MIT',
     description='Binary search algorithm for big sorted files that cannot be read into RAM.',
     author='Thomas Roder',
     author_email='roder.thomas@gmail.com',
     url='https://github.com/MrTomRod/',
-    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_1.tar.gz',
+    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_2.tar.gz',
     keywords=['binary', 'search', 'file', 'files'],
     install_requires=[],
     classifiers=[
