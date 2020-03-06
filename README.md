@@ -4,9 +4,12 @@ Binary search algorithm for big sorted files that cannot be read into RAM.
 
 ## Requirements:
 
-* file must be **sorted by the first column**. (in bash: `sort --key=1 --field-separator=\t --output=file.txt.sorted file.txt`)
-* every line must begin with the sorted string/integer, followed by a separator.
-* there may be multiple lines beginning with the same string/integer. (the script will return a list of lines that start with the same string/integer)
+* File must be **sorted by the first column**.
+    * bash, for integers: `sort -n --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
+    * bash, for text: `LC_ALL=C sort --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
+* Every line must begin with the sorted string/integer, followed by a separator.
+* There may be multiple lines beginning with the same string/integer. (the script will return a list of lines that 
+start with the same string/integer)
 
 ## Installation:
 
@@ -18,11 +21,10 @@ pip install binary_file_search
 
 ```Python
 from binary_file_search.BinaryFileSearch import BinaryFileSearch
-bfs = BinaryFileSearch('/path/to/file', sep="\t")
-lines = bfs.extract_lines_beginning_with('query')  # get lines that begin with 'query':
+with BinaryFileSearch('/path/to/file', sep="\t", string_mode=True) as bfs:
+    # assert bfs.is_file_sorted()  # test if the file is sorted.
+    lines = bfs.search('query')  # get lines that begin with 'query'
 ```
-
-Tip: `run bfs.close_file()` after usage.
 
 ### Parameters
 

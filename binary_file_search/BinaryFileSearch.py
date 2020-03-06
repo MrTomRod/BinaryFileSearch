@@ -1,6 +1,3 @@
-import os
-
-
 class BinaryFileSearch:
     """
     Binary search algorithm for big sorted files that cannot be read into RAM.
@@ -8,17 +5,17 @@ class BinaryFileSearch:
     Requirements:
     -------------
         - file must be sorted by the first column
-            (bash example: sort --key=1 --field-separator=\t --output=file.txt.sorted file.txt)
+            integer-sorting in bash: `sort -n --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
+            string-sorting in bash: `LC_ALL=C sort --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
         - every line must begin with the sorted string/integer, followed by a separator
         - there may be multiple lines beginning with the same string/integer
-            (the script will return a list of lines that start with the same string/integer)
+            the script will return a list of lines that start with the same string/integer
 
     Example Usage:
     --------------
-    bfs = BinaryFileSearch(file_path, sep="\t")
-    lines = bfs.extract_lines_beginning_with(query)  # get lines that begin with :param query:
-
-    Tip: run bfs.close_file() after usage!
+    with BinaryFileSearch("test/data/nodes.dmp") as bsf:
+        lines = bfs.search(query)  # get lines that begin with :param query:
+        # lines is now list of lines, the lines being split by sep:, e.g. [ [[query][l1], ...], [[query][l2]], ... ]
 
     Credit:
     -------
@@ -27,45 +24,38 @@ class BinaryFileSearch:
     :param file: the sorted file to be searched
     :param sep: separator (default: "\t")
     :param string_mode: True if the sorted column consists of strings, False if integers
-    :param query: string/integer to search
-
-    :returns: list of lines, the lines being separated by :param sep:, e.g. [ [[query][l1]], [[query][l2]], ... ]
-    :rtype: int
-    :raises KeyError: if the number isn't found
     """
 
-    def __init__(self, file: str, sep: str = "\t", string_mode: bool = False):
-        assert os.path.isfile(file), "Error: file does not exist: '{}'".format(file)
+    def __init__(self, file: str, sep: str = "\t", string_mode: bool = False, sort_mode='bash'):
         self.file_path = file
-        self.f = None
-        self.length = None
-        self.sep = None
-        self.string_mode = None
-
-        self.open_file(file=file, sep=sep, string_mode=string_mode)
-
-    def open_file(self, file=None, sep: str = None, string_mode: bool = None):
-        self.close_file()
-        if file == None: file = self.file_path
-        if sep == None: sep = self.sep
-        if string_mode == None: string_mode = self.string_mode
-        assert os.path.isfile(file), "Error: file does not exist: '{}'".format(file)
-        self.file_path = file
-        self.f = open(file, 'rt')
-        self.f.seek(0, 2)  # 0 = offset, 2 = relative to file end => go to last char in file!
-        self.length = self.f.tell()
         self.sep = sep
         self.string_mode = string_mode
 
-    def extract_lines_beginning_with(self, query) -> list:
+    def __enter__(self):
+        self.f = open(self.file_path, 'r')
+        self.f.seek(0, 2)  # 0 = offset, 2 = relative to file end => go to last char in file!
+        self.length = self.f.tell()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.f.close()
+
+    def search(self, query) -> list:
+        """
+        Search for query in sorted file. Returns list of all lines that begin with query.
+
+        :param query: string/integer to search
+        :returns: list of lines, the lines being separated by sep:, e.g. [ [[query][l1]], [[query][l2]], ... ]
+        :raises KeyError: if the query isn't found
+        :raises TypeError: if the type of the query does not match string_mode
+        """
+
         if self.string_mode:
-            assert type(query) == str, "string_mode is on, query type must be str! query: {}, type: {}".format(query,
-                                                                                                               type(
-                                                                                                                   query))
+            if type(query) != str: raise TypeError(
+                F"string_mode is on, query must be str! query: {query}, type: {type(query)}")
         else:
-            assert type(query) == int, "string_mode is off, query type must be int! query: {}, type: {}".format(query,
-                                                                                                                type(
-                                                                                                                    query))
+            if type(query) != int: raise TypeError(
+                F"string_mode is off, query must be int! query: {query}, type: {type(query)}")
 
         # find the offset where the matching lines begin
         offset = self.__binary_search(query=query)
@@ -94,6 +84,7 @@ class BinaryFileSearch:
 
         :returns: offset in file where the first line that matches :param query: begins
         """
+
         return self.__recursive_binary_search(query=query, l=0, h=self.length)
 
     def __recursive_binary_search(self, query, l: int, h: int) -> int:
@@ -103,6 +94,7 @@ class BinaryFileSearch:
 
         :returns: offset in file where the first line that matches :param query: begins
         """
+
         if h >= l:
             mid = l + (h - l) // 2
 
@@ -166,9 +158,33 @@ class BinaryFileSearch:
         else:
             return self.f.tell()
 
-    def get_file(self):
-        return self.f
+    def is_file_sorted(self) -> bool:
+        """
+        This helper function can be used as a sanity check.
+        It tests whether your file is sorted according to Python rules.
 
-    def close_file(self):
-        if self.f and not self.f.closed:
-            self.f.close()
+        :returns: True if sorted; False if not sorted
+        """
+
+        if self.string_mode:
+            prev = ''
+
+            def a_smaller_than_b(a, b):
+                return a < b
+        else:
+            self.f.seek(0)
+            prev = int(self.f.readline().split(self.sep, maxsplit=1)[0]) - 1
+
+            def a_smaller_than_b(a, b):
+                print(a, b)
+                return int(a) < int(b)
+
+        self.f.seek(0)
+        line = self.f.readline()
+        while line:
+            curr = line.split(self.sep, maxsplit=1)[0]
+            if a_smaller_than_b(curr, prev):
+                return False
+            prev = curr
+            line = self.f.readline()
+        return True

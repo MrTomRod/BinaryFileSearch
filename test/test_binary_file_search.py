@@ -1,93 +1,82 @@
-import os
 from unittest import TestCase
 from binary_file_search.BinaryFileSearch import BinaryFileSearch
 
 
-class TestBinaryFileSearch_IntMode(TestCase):
-    def setUp(self) -> None:
-        assert os.path.isfile("data/nodes.dmp")
-        self.bs_nodes = BinaryFileSearch("data/nodes.dmp")
-        self.bs_names = BinaryFileSearch("data/names.dmp")
-
-    def tearDown(self) -> None:
-        self.bs_nodes.close_file()
-        self.bs_names.close_file()
-
-    def test_nodes_first(self):
-        self.assertEqual(0, self.bs_nodes._BinaryFileSearch__binary_search(query=1))
-        self.assertEqual(0, self.bs_names._BinaryFileSearch__binary_search(query=1))
-
-    def test_nodes_last(self):
-        self.assertEqual(144253158, self.bs_nodes._BinaryFileSearch__binary_search(query=2590146))
-        self.assertEqual(181458564, self.bs_names._BinaryFileSearch__binary_search(query=2590146))
-
-    def test_nodes_regular(self):
-        # no error should be thrown
-        self.assertEqual(21624, self.bs_nodes._BinaryFileSearch__binary_search(query=453))
-        self.assertEqual(7184, self.bs_nodes._BinaryFileSearch__binary_search(query=151))
-
-    def test_nodes_nonexistent(self):
-        with self.assertRaises(KeyError):
-            self.bs_nodes._BinaryFileSearch__binary_search(query=4)
-            self.bs_names._BinaryFileSearch__binary_search(query=4)
-
-    def test_single_lines(self):
-        self.assertEqual(1, len(self.bs_nodes.extract_lines_beginning_with(536110)))
-        self.assertEqual(1, len(self.bs_names.extract_lines_beginning_with(536110)))
-
-    def test_multiple_lines(self):
-        self.assertLess(1, len(self.bs_names.extract_lines_beginning_with(2)))
-
-
 class TestBinaryFileSearch_StrMode(TestCase):
     def setUp(self) -> None:
-        self.bs_text = BinaryFileSearch("data/text_test.sorted", string_mode=True)
+        self.bfs: BinaryFileSearch
+        self.bfs = BinaryFileSearch("data/text_test.sorted", string_mode=True).__enter__()
+        assert self.bfs.is_file_sorted()
 
     def tearDown(self) -> None:
-        self.bs_text.close_file()
+        self.bfs.__exit__(None, None, None)
 
-    def test_nodes_first(self):
-        self.assertEqual(0, self.bs_text._BinaryFileSearch__binary_search(query='A0A023GPI8'))
+    def test_wrong_query_type(self):
+        with self.assertRaises(TypeError):
+            self.bfs.search(query=1)
 
-    def test_nodes_last(self):
-        self.assertEqual(8176, self.bs_text._BinaryFileSearch__binary_search(query='A0A067XMP2'))
-
-    def test_nodes_regular(self):
-        # no error should be thrown
-        self.assertEqual(7181, self.bs_text._BinaryFileSearch__binary_search(query='A0A059U906'))
-
-    def test_nodes_nonexistent(self):
+    def test_nonexistent(self):
         with self.assertRaises(KeyError):
-            self.bs_text._BinaryFileSearch__binary_search(query="ain't got nothin' like dat")
+            self.bfs.search(query="ain't got nothin' like dat")
+
+    def test_bad_file(self):
+        with self.assertRaises(FileNotFoundError):
+            with BinaryFileSearch('very!bad!path') as bfs:
+                pass
+
+    def test_first(self):
+        with open('data/text_test.sorted')as f:
+            print(repr(f.read()))
+        self.assertEqual([['aa', 'first']], self.bfs.search(query='aa'))
+
+    def test_last(self):
+        self.assertEqual([['zz', 'last']], self.bfs.search(query='zz'))
+
+    def test_regular(self):
+        # no error should be thrown
+        self.assertEqual([['aaa', 'third']], self.bfs.search(query='aaa'))
 
     def test_single_lines(self):
-        self.assertEqual(1, len(self.bs_text.extract_lines_beginning_with('A0A023IWG3')))
+        self.assertEqual(1, len(self.bfs.search('aaa')))
 
     def test_multiple_lines(self):
-        self.assertLess(1, len(self.bs_text.extract_lines_beginning_with('A0A023GS28')))
+        self.assertEquals(2, len(self.bfs.search('bA')))
+
+    def test_multiple_searches(self):
+        self.assertEqual([['bA', 'fourth_1'], ['bA', 'fourth_2']], self.bfs.search(query='bA'))
+        self.assertEqual([['aaA', 'second']], self.bfs.search(query='aaA'))
 
 
-class TestBinaryFileSearch_Reopen(TestCase):
+class TestBinaryFileSearch_IntMode(TestCase):
     def setUp(self) -> None:
-        self.bs_reopen = BinaryFileSearch("data/text_test.sorted", string_mode=True)
+        self.bfs: BinaryFileSearch
+        self.bfs = BinaryFileSearch("data/int_test.sorted", string_mode=False).__enter__()
+        assert self.bfs.is_file_sorted()
 
     def tearDown(self) -> None:
-        self.bs_reopen.close_file()
+        self.bfs.__exit__(None, None, None)
 
-    def test_reopen_same(self):
-        self.assertEqual(7181, self.bs_reopen._BinaryFileSearch__binary_search(query='A0A059U906'))
+    def test_wrong_query_type(self):
+        with self.assertRaises(TypeError):
+            self.bfs.search(query='1')
 
-        self.bs_reopen.close_file()
+    def test_nonexistent(self):
+        with self.assertRaises(KeyError):
+            self.bfs._BinaryFileSearch__binary_search(query=0)
 
-        self.bs_reopen.open_file()
+    def test_first(self):
+        self.assertEqual([[1, 'one']], self.bfs.search(query=1))
 
-        self.assertEqual(7181, self.bs_reopen._BinaryFileSearch__binary_search(query='A0A059U906'))
+    def test_last(self):
+        self.assertEqual([[1000000, 'million']], self.bfs.search(query=1000000))
 
-    def test_reopen_different(self):
-        self.assertEqual(7181, self.bs_reopen._BinaryFileSearch__binary_search(query='A0A059U906'))
+    def test_regular(self):
+        # no error should be thrown
+        self.assertEqual([[4, 'four']], self.bfs.search(query=4))
+        self.assertEqual([[3, 'three']], self.bfs.search(query=3))
 
-        self.bs_reopen.close_file()
+    def test_single_lines(self):
+        self.assertEqual(1, len(self.bfs.search(4)))
 
-        self.bs_reopen.open_file("data/nodes.dmp", string_mode=False)
-
-        self.assertEqual(21624, self.bs_reopen._BinaryFileSearch__binary_search(query=453))
+    def test_multiple_lines(self):
+        self.assertLess(1, len(self.bfs.search(40)))
