@@ -50,7 +50,7 @@ class TestBinaryFileSearch_StrMode(TestCase):
 class TestBinaryFileSearch_IntMode(TestCase):
     def setUp(self) -> None:
         self.bfs: BinaryFileSearch
-        self.bfs = BinaryFileSearch("data/int_test.sorted", string_mode=False).__enter__()
+        self.bfs = BinaryFileSearch("data/int_test.sorted", sep=',', string_mode=False).__enter__()
         assert self.bfs.is_file_sorted()
 
     def tearDown(self) -> None:

@@ -7,14 +7,14 @@ from os import path
 setup(
     name='binary_file_search',
     packages=['binary_file_search'],
-    version='0.5',
+    version='0.6',
     license='MIT',
     description='Binary search algorithm for big sorted files that cannot be read into RAM.',
     long_description='Please read the descriptionon on the github page.',
     author='Thomas Roder',
     author_email='roder.thomas@gmail.com',
     url='https://github.com/MrTomRod/BinaryFileSearch',
-    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_5.tar.gz',
+    download_url='https://github.com/MrTomRod/BinaryFileSearch/archive/v0_6.tar.gz',
     keywords=['binary', 'search', 'file', 'files'],
     install_requires=[],
     classifiers=[

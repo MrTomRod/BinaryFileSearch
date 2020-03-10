@@ -26,7 +26,7 @@ class BinaryFileSearch:
     :param string_mode: True if the sorted column consists of strings, False if integers
     """
 
-    def __init__(self, file: str, sep: str = "\t", string_mode: bool = False, sort_mode='bash'):
+    def __init__(self, file: str, sep: str = "\t", string_mode: bool = False):
         self.file_path = file
         self.sep = sep
         self.string_mode = string_mode
@@ -65,12 +65,12 @@ class BinaryFileSearch:
 
         # return matching lines as list
         lines_that_start_with_query = []
-        line = self.f.readline().strip().split("\t")
+        line = self.f.readline().strip().split(self.sep)
         if not self.string_mode: line[0] = int(line[0])
         while line[0] == query:
             lines_that_start_with_query.append(line)
 
-            line = self.f.readline().strip().split("\t")
+            line = self.f.readline().strip().split(self.sep)
             if line == ['']:  # happens only at the last line.
                 break
             if not self.string_mode: line[0] = int(line[0])
@@ -176,7 +176,6 @@ class BinaryFileSearch:
             prev = int(self.f.readline().split(self.sep, maxsplit=1)[0]) - 1
 
             def a_smaller_than_b(a, b):
-                print(a, b)
                 return int(a) < int(b)
 
         self.f.seek(0)
