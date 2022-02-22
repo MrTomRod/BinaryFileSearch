@@ -80,3 +80,30 @@ class TestBinaryFileSearch_IntMode(TestCase):
 
     def test_multiple_lines(self):
         self.assertLess(1, len(self.bfs.search(40)))
+
+
+class TestBinaryFileSearch_IntModeSecondColumn(TestCase):
+    def setUp(self) -> None:
+        self.bfs: BinaryFileSearch
+        self.bfs = BinaryFileSearch("data/int_test_second_column.sorted", sep=',', string_mode=False, i_column=1).__enter__()
+        assert self.bfs.is_file_sorted()
+
+    def tearDown(self) -> None:
+        self.bfs.__exit__(None, None, None)
+
+    def test_first(self):
+        self.assertEqual([['60', 1, 'one']], self.bfs.search(query=1))
+
+    def test_last(self):
+        self.assertEqual([['8', 1000000, 'million']], self.bfs.search(query=1000000))
+
+    def test_regular(self):
+        # no error should be thrown
+        self.assertEqual([['9', 4, 'four']], self.bfs.search(query=4))
+        self.assertEqual([['80', 3, 'three']], self.bfs.search(query=3))
+
+    def test_single_lines(self):
+        self.assertEqual(1, len(self.bfs.search(4)))
+
+    def test_multiple_lines(self):
+        self.assertLess(1, len(self.bfs.search(40)))
