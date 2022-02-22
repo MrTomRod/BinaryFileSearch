@@ -7,7 +7,7 @@ from os import path
 setup(
     name='binary_file_search',
     packages=['binary_file_search'],
-    version='0.6',
+    version='0.7',
     license='MIT',
     description='Binary search algorithm for big sorted files that cannot be read into RAM.',
     long_description='Please read the descriptionon on the github page.',
