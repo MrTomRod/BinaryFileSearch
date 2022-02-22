@@ -4,17 +4,17 @@ class BinaryFileSearch:
 
     Requirements:
     -------------
-        - file must be sorted by the first column
+        - file must be sorted by the column with index i_column
             integer-sorting in bash: `sort -n --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
             string-sorting in bash: `LC_ALL=C sort --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
-        - every line must begin with the sorted string/integer, followed by a separator
-        - there may be multiple lines beginning with the same string/integer
-            the script will return a list of lines that start with the same string/integer
+        - every line must contain the sorted string/integer in the same column, followed by a separator
+        - there may be multiple lines having the same string/integer
+            the script will return a list of lines that have the same string/integer
 
     Example Usage:
     --------------
     with BinaryFileSearch("test/data/nodes.dmp") as bsf:
-        lines = bfs.search(query)  # get lines that begin with :param query:
+        lines = bfs.search(query)  # get lines that have with :param query in the column indexed by i_column (default 0):
         # lines is now list of lines, the lines being split by sep:, e.g. [ [[query][l1], ...], [[query][l2]], ... ]
 
     Credit:
@@ -24,12 +24,14 @@ class BinaryFileSearch:
     :param file: the sorted file to be searched
     :param sep: separator (default: "\t")
     :param string_mode: True if the sorted column consists of strings, False if integers
+    :param i_column: int index of column in which to search for query
     """
 
-    def __init__(self, file: str, sep: str = "\t", string_mode: bool = False):
+    def __init__(self, file: str, sep: str = "\t", string_mode: bool = False, i_column: int = 0):
         self.file_path = file
         self.sep = sep
         self.string_mode = string_mode
+        self.i_column = i_column
 
     def __enter__(self):
         self.f = open(self.file_path, 'r')
@@ -42,7 +44,7 @@ class BinaryFileSearch:
 
     def search(self, query) -> list:
         """
-        Search for query in sorted file. Returns list of all lines that begin with query.
+        Search for query in sorted file. Returns list of all lines that have the query-value in position i_column.
 
         :param query: string/integer to search
         :returns: list of lines, the lines being separated by sep:, e.g. [ [[query][l1]], [[query][l2]], ... ]
@@ -66,14 +68,14 @@ class BinaryFileSearch:
         # return matching lines as list
         lines_that_start_with_query = []
         line = self.f.readline().strip().split(self.sep)
-        if not self.string_mode: line[0] = int(line[0])
-        while line[0] == query:
+        if not self.string_mode: line[self.i_column] = int(line[self.i_column])
+        while line[self.i_column] == query:
             lines_that_start_with_query.append(line)
 
             line = self.f.readline().strip().split(self.sep)
             if line == ['']:  # happens only at the last line.
                 break
-            if not self.string_mode: line[0] = int(line[0])
+            if not self.string_mode: line[self.i_column] = int(line[self.i_column])
 
         assert len(lines_that_start_with_query) > 0
         return lines_that_start_with_query
@@ -111,7 +113,7 @@ class BinaryFileSearch:
                 self.f.seek(line_start)
 
             # get current_id
-            current_id = self.f.readline().split(self.sep, 1)[0]
+            current_id = self.f.readline().split(self.sep, maxsplit=self.i_column+1)[self.i_column]
             if not self.string_mode: current_id = int(current_id)
 
             # binary search algorithm main logic
@@ -134,14 +136,14 @@ class BinaryFileSearch:
 
             if self.f.read(1) == "\n":
                 line = self.f.readline()
-                id = line.split(self.sep, 1)[0]  # moves cursor forward to next line!
+                id = line.split(self.sep, maxsplit=self.i_column+1)[self.i_column]  # moves cursor forward to next line!
                 if not self.string_mode: id = int(id)
                 if id != query:
                     final_line = self.f.tell()  # curser should now be at start of first line
                     if self.string_mode:
-                        assert self.f.readline().split(self.sep, 1)[0] == query  # next line must have proper id
+                        assert self.f.readline().split(self.sep, maxsplit=self.i_column+1)[self.i_column] == query  # next line must have proper id
                     else:
-                        assert int(self.f.readline().split(self.sep, 1)[0]) == query  # next line must have proper id
+                        assert int(self.f.readline().split(self.sep, maxsplit=self.i_column+1)[self.i_column]) == query  # next line must have proper id
                     return final_line
 
             current_position -= 1  # walk back
@@ -149,9 +151,9 @@ class BinaryFileSearch:
         # code should only end up here if first or second element in file was found
         assert self.f.seek(current_position) == 0
         if self.string_mode:
-            current_id = self.f.readline().split(self.sep, 1)[0]
+            current_id = self.f.readline().split(self.sep, maxsplit=self.i_column+1)[self.i_column]
         else:
-            current_id = int(self.f.readline().split(self.sep, 1)[0])
+            current_id = int(self.f.readline().split(self.sep, maxsplit=self.i_column+1)[self.i_column])
 
         if current_id == query:
             return 0
@@ -173,7 +175,7 @@ class BinaryFileSearch:
                 return a < b
         else:
             self.f.seek(0)
-            prev = int(self.f.readline().split(self.sep, maxsplit=1)[0]) - 1
+            prev = int(self.f.readline().split(self.sep, maxsplit=self.i_column+1)[self.i_column]) - 1
 
             def a_smaller_than_b(a, b):
                 return int(a) < int(b)
@@ -181,7 +183,7 @@ class BinaryFileSearch:
         self.f.seek(0)
         line = self.f.readline()
         while line:
-            curr = line.split(self.sep, maxsplit=1)[0]
+            curr = line.split(self.sep, maxsplit=self.i_column+1)[self.i_column]
             if a_smaller_than_b(curr, prev):
                 return False
             prev = curr
