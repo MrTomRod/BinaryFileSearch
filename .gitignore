@@ -72,3 +72,5 @@ fabric.properties
 test/data/*
 __pycache__/
 .pytest_cache/
+build
+dist

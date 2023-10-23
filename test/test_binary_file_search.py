@@ -25,7 +25,7 @@ class TestBinaryFileSearch_StrMode(TestCase):
                 pass
 
     def test_first(self):
-        with open('data/text_test.sorted')as f:
+        with open('data/text_test.sorted') as f:
             print(repr(f.read()))
         self.assertEqual([['aa', 'first']], self.bfs.search(query='aa'))
 

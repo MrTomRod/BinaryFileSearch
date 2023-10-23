@@ -5,8 +5,8 @@ Binary search algorithm for big sorted files that cannot be read into RAM.
 ## Requirements:
 
 * File must be **sorted by the first column**.
-    * bash, for integers: `sort -n --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
-    * bash, for text: `LC_ALL=C sort --key=1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
+    * bash, for integers: `sort -n --key=1,1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
+    * bash, for text: `LC_ALL=C sort --key=1,1 --field-separator=$'\t' --output=file.txt.sorted file.txt`
 * Every line must begin with the sorted string/integer, followed by a separator.
 * There may be multiple lines beginning with the same string/integer. (the script will return a list of lines that 
 start with the same string/integer)
